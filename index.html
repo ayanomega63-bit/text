@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Realtime Chat</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f2f2f2;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+#chatContainer{
+width:400px;
+height:550px;
+background:white;
+border-radius:10px;
+display:flex;
+flex-direction:column;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+#messages{
+flex:1;
+overflow-y:auto;
+padding:15px;
+}
+
+.message{
+background:#e6e6e6;
+padding:8px 12px;
+margin-bottom:8px;
+border-radius:6px;
+width:fit-content;
+}
+
+#inputArea{
+display:flex;
+border-top:1px solid #ddd;
+}
+
+#messageInput{
+flex:1;
+border:none;
+padding:12px;
+font-size:14px;
+}
+
+#sendBtn{
+background:#4CAF50;
+color:white;
+border:none;
+padding:12px 18px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="chatContainer">
+
+<div id="messages"></div>
+
+<div id="inputArea">
+<input id="messageInput" placeholder="Type a message...">
+<button id="sendBtn">Send</button>
+</div>
+
+</div>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyB8v0UKal1JY2dFsHET41psgWPPHWZrUbs",
+authDomain: "text-c6bed.firebaseapp.com",
+projectId: "text-c6bed",
+storageBucket: "text-c6bed.firebasestorage.app",
+messagingSenderId: "764684585209",
+appId: "1:764684585209:web:07389a56a7c81de20efa28",
+measurementId: "G-6VEZN78ZLT"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+
+const q = query(collection(db,"messages"), orderBy("time"));
+
+onSnapshot(q,(snapshot)=>{
+
+messagesDiv.innerHTML="";
+
+snapshot.forEach(doc=>{
+
+const msg = document.createElement("div");
+msg.className="message";
+msg.innerText = doc.data().text;
+
+messagesDiv.appendChild(msg);
+
+});
+
+messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+});
+
+
+async function sendMessage(){
+
+if(input.value.trim()==="") return;
+
+await addDoc(collection(db,"messages"),{
+text: input.value,
+time: Date.now()
+});
+
+input.value="";
+
+}
+
+sendBtn.onclick = sendMessage;
+
+input.addEventListener("keypress",function(e){
+if(e.key==="Enter") sendMessage();
+});
+
+</script>
+
+</body>
+</html>
